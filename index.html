@@ -1,0 +1,2293 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity 實戰開發與協作教學手冊</title>
+    <meta name="description" content="本網頁整併了 指導老師指導專案開發的協作規範以及 Antigravity 的主介面功能與專案掛載逐步教學。">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(23, 28, 41, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1; /* Indigo */
+            --primary-glow: rgba(99, 102, 241, 0.15);
+            --accent: #10b981; /* Emerald */
+            --accent-glow: rgba(16, 185, 129, 0.15);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --font-outfit: 'Outfit', 'Noto Sans TC', sans-serif;
+            --font-sans: 'Noto Sans TC', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.06) 0%, transparent 45%);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        /* Layout Structure */
+        .layout-wrapper {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            gap: 2.5rem;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            width: 280px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: fadeInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Content Area */
+        main {
+            flex-grow: 1;
+            width: 0; /* Prevents overflow */
+            animation: fadeInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Sidebar styling */
+        .aside-title {
+            font-family: var(--font-outfit);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            background: linear-gradient(135deg, #ffffff 40%, #c7d2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 0.75rem;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            display: block;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item a:hover {
+            color: #ffffff;
+            background: rgba(99, 102, 241, 0.1);
+            padding-left: 1.2rem;
+        }
+
+        /* Main cards styling */
+        header {
+            margin-bottom: 2.5rem;
+            text-align: left;
+        }
+
+        h1 {
+            font-family: var(--font-outfit);
+            font-size: 2.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2.5rem;
+            scroll-margin-top: 2rem; /* Smooth offset for anchors */
+        }
+
+        h2.section-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2.section-header::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 3px;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* Role styling in Section 1 */
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .role-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .role-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .role-name {
+            font-family: var(--font-outfit);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .role-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .rule-list {
+            list-style: none;
+            margin-top: 1.5rem;
+        }
+
+        .rule-item {
+            position: relative;
+            padding-left: 2rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .rule-item::before {
+            content: "✦";
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .rule-title {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .rule-detail {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0 4px;
+            border: 1px solid rgba(16, 185, 129, 0.15);
+        }
+
+        .badge-primary {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+        }
+
+        /* Image styling */
+        .img-wrapper {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 8px;
+            overflow: hidden;
+            margin: 1.5rem 0 2.5rem 0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            transition: border-color 0.3s ease;
+        }
+
+        .img-wrapper:hover {
+            border-color: rgba(99, 102, 241, 0.25);
+        }
+
+        .img-wrapper img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: block;
+        }
+
+        /* Timeline style for Section 3 */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 2px solid rgba(255, 255, 255, 0.05);
+            margin: 2rem 0;
+        }
+
+        .timeline-step {
+            position: relative;
+            margin-bottom: 3.5rem;
+        }
+
+        .timeline-step:last-child {
+            margin-bottom: 1rem;
+        }
+
+        .step-num {
+            position: absolute;
+            left: calc(-2rem - 17px);
+            top: 0;
+            background: #0b0f19;
+            border: 3px solid var(--primary);
+            color: #ffffff;
+            font-family: var(--font-outfit);
+            font-size: 1rem;
+            font-weight: 700;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px var(--primary-glow);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-step:hover .step-num {
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-title span {
+            color: var(--primary);
+            font-family: var(--font-outfit);
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+
+        /* Grid for Interface items */
+        .intro-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .intro-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .intro-item {
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .intro-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(99, 102, 241, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .intro-name {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .intro-name::before {
+            content: "◆";
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+
+        .intro-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .intro-desc ul {
+            list-style: none;
+            padding-left: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .intro-desc li {
+            position: relative;
+            padding-left: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .intro-desc li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        /* Details Summary Dropdown Styling */
+        details.skill-dropdown {
+            background: rgba(255, 255, 255, 0.012);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        details.skill-dropdown[open] {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(99, 102, 241, 0.25);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        summary.skill-summary {
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            color: #ffffff;
+            cursor: pointer;
+            outline: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            list-style: none;
+            user-select: none;
+            font-family: var(--font-outfit);
+        }
+
+        summary.skill-summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary.skill-summary::after {
+            content: "✦";
+            color: var(--text-muted);
+            font-weight: bold;
+            transition: transform 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        details.skill-dropdown[open] summary.skill-summary::after {
+            content: "－";
+            color: var(--accent);
+        }
+
+        .skill-content {
+            padding: 0 1.25rem 1.25rem 1.25rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .skill-content p {
+            margin-top: 0.75rem;
+        }
+
+        .skill-name {
+            color: #ffffff;
+            font-size: 0.95rem;
+        }
+
+        .skill-badge {
+            background: rgba(16, 185, 129, 0.08);
+            color: var(--accent);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            font-size: 0.75rem;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 1.5rem;
+            margin-left: auto;
+        }
+
+        /* Animations */
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 900px) {
+            .layout-wrapper {
+                flex-direction: column;
+            }
+            aside {
+                width: 100%;
+                position: static;
+                margin-bottom: 1rem;
+            }
+            main {
+                width: 100%;
+            }
+        }
+
+        /* Supplemental Chapters Highlighting */
+        .supplement-card {
+            border: 1px solid rgba(6, 182, 212, 0.35) !important;
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.15) !important;
+            background: linear-gradient(135deg, rgba(8, 47, 73, 0.4), rgba(15, 23, 42, 0.75)) !important;
+        }
+        .supplement-card blockquote, 
+        .supplement-card code {
+            word-break: break-all !important;
+            white-space: pre-wrap !important;
+        }
+        .supplement-nav-item a {
+            color: #22d3ee !important; /* Cyber Cyan highlight */
+            font-weight: bold !important;
+            text-shadow: 0 0 8px rgba(34, 211, 238, 0.3);
+        }
+        
+        .supplement-nav-item a:hover {
+            color: #67e8f9 !important;
+            background: rgba(6, 182, 212, 0.1) !important;
+            padding-left: 1.2rem;
+        }
+    
+
+        /* Copy Button & Prompt Box styling */
+        .prompt-box {
+            position: relative;
+            background: rgba(6, 182, 212, 0.05) !important;
+            border: 1px solid rgba(6, 182, 212, 0.25) !important;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .prompt-header {
+            color: #ffffff;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .copy-btn {
+            background: rgba(6, 182, 212, 0.2) !important;
+            border: 1px solid rgba(6, 182, 212, 0.4) !important;
+            color: #22d3ee !important;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        .copy-btn:hover {
+            background: rgba(6, 182, 212, 0.45) !important;
+            box-shadow: 0 0 8px rgba(34, 211, 238, 0.45) !important;
+            color: #ffffff !important;
+        }
+    
+    </style>
+</head>
+<body>
+
+<div class="layout-wrapper">
+    <!-- Sidebar Navigation -->
+    <aside>
+        <div class="aside-title">課程目錄</div>
+        <ul class="nav-list">
+            <li class="nav-item"><a href="#download-install">1. 下載與安裝 Antigravity</a></li>
+            <li class="nav-item supplement-nav-item"><a href="#python-setup">✦ 補充1. Python環境設定</a></li>
+            <li class="nav-item"><a href="#interface-intro">2. Antigravity 主介面功能導覽</a></li>
+            <li class="nav-item"><a href="#project-setup-load">3. 如何在 Antigravity 中建立專案與載入資料夾</a></li>
+            <li class="nav-item supplement-nav-item"><a href="#pdf-to-csv">✦ 補充2. PDF轉CSV實戰</a></li>
+            <li class="nav-item supplement-nav-item"><a href="#pdf-csv-verify">✦ 補充3. PDF與CSV驗證報告</a></li>
+            <li class="nav-item"><a href="#settings-permissions">4. 設定與安全權限管理</a></li>
+            <li class="nav-item"><a href="#settings-appearance">5. 外觀與對話顯示設定</a></li>
+            <li class="nav-item"><a href="#settings-models">6. AI 模型與配額管理</a></li>
+            <li class="nav-item"><a href="#settings-customizations">7. 自訂指令與外掛技能</a></li>
+            <li class="nav-item"><a href="#settings-browser">8. 瀏覽器自動化設定</a></li>
+            <li class="nav-item"><a href="#settings-app">9. 應用程式基礎設定</a></li>
+            <li class="nav-item"><a href="#custom-skills-practice">10. 建立與管理自訂 Skill</a></li>
+            <li class="nav-item"><a href="#project-specific-settings">11. 專案專屬偏好與本地安全權限設定</a></li>
+            <li class="nav-item"><a href="#github-connector">12. 實戰進階：建立 GitHub Connector 技能</a></li>
+            <li class="nav-item"><a href="#collaboration-rules">附錄：協作規範與原則</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+        <header>
+            <h1>Antigravity 實戰開發與協作教學手冊</h1>
+            <div class="subtitle">指導老師 指導學生實戰教學系列</div>
+        </header>
+
+        <!-- Section 1 -->
+        <section id="download-install" class="section-card">
+            <h2 class="section-header">1. 下載與安裝 Antigravity (Download & Install)</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                本章將引導學生下載與安裝 Antigravity 2.0 軟體，以進行後續的 AI 協作開發與實作。
+            </p>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 1.1 進入官網首頁
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                請使用瀏覽器開啟 Antigravity 官方網站：<a href="https://antigravity.google/" target="_blank" style="color: var(--primary); text-decoration: none; border-bottom: 1px dashed var(--primary);">https://antigravity.google/</a>。
+            </p>
+
+            <div class="img-wrapper" style="margin-bottom: 2rem;">
+                <img src="./images/download_homepage.png" alt="Antigravity 官網首頁">
+            </div>
+
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                在首頁中央，點選 <span class="highlight">Download for Windows</span> 按鈕（若使用其他作業系統，亦可點選右上角的 <span class="highlight">Download</span>），即可導覽至下載頁面。
+            </p>
+
+            <div class="divider"></div>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 1.2 選擇對應的作業系統下載
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                官方下載頁面網址為：<a href="https://antigravity.google/download" target="_blank" style="color: var(--primary); text-decoration: none; border-bottom: 1px dashed var(--primary);">https://antigravity.google/download</a>。
+            </p>
+
+            <div class="img-wrapper" style="margin-bottom: 2rem;">
+                <img src="./images/download_options.png" alt="Antigravity 下載頁面選項">
+            </div>
+
+            <div class="intro-grid" style="margin-top: 1.5rem;">
+                <div class="intro-item">
+                    <div class="intro-name">macOS 版本選擇</div>
+                    <div class="intro-desc">
+                        <ul>
+                            <li><strong style="color: #ffffff;">Download for Apple Silicon</strong>：適用於 Apple M1/M2/M3 等處理晶片（目前主流晶片）。</li>
+                            <li><strong style="color: #ffffff;">Download for Intel</strong>：適用於較早期的 Intel 處理器 Mac 電腦。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">Windows & Linux 版本選擇</div>
+                    <div class="intro-desc">
+                        <ul>
+                            <li><strong style="color: #ffffff;">Download for x64</strong>：適用於一般常見的 64 位元 Intel 或 AMD 處理器電腦。</li>
+                            <li><strong style="color: #ffffff;">Download for ARM64</strong>：適用於採用 ARM 架構處理器的新型電腦。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 1.5rem;">
+                下載完成後，雙擊安裝檔並依據畫面提示步驟完成安裝，即可啟動 Antigravity 主介面。
+            </p>
+        </section>
+
+        <!-- Section 2: Python Environment Setup -->
+        <section id="python-setup" class="section-card supplement-card">
+            <h2 class="section-header">補充1：安裝與設定 Python 開發環境 (Python Environment Setup)</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                在我們開始使用 Antigravity 進行 AI 協作開發與編寫小程式之前，必須先建立好本地主機的 Python 執行環境。
+            </p>
+
+            <div class="intro-grid" style="margin-bottom: 2rem;">
+                <div class="intro-item">
+                    <div class="intro-name">補充1.1 為什麼需要安裝 Python 基本環境？</div>
+                    <div class="intro-desc">
+                        <ul>
+                            <li><strong style="color: #ffffff;">宿主命令支援</strong>：Windows 預設不提供 <code>python</code> 命令。安裝 Python 能讓系統核心認識並執行 <code>python</code> 與 <code>pip</code> 指令。</li>
+                            <li><strong style="color: #ffffff;">腳本執行基石</strong>：後續的所有實戰開發（例如將 IPAS 題庫 PDF 檔案自動解析並轉換為 CSV 檔案）都需要透過本地 Python 腳本來執行。</li>
+                            <li><strong style="color: #ffffff;">AI 助理自動化</strong>：Antigravity 在背景為您分析程式碼、安裝相依套件、甚至執行測試時，都需要依賴您本機安裝的 Python 作為引擎。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">補充1.2 認識全域變數（PATH 環境變數）</div>
+                    <div class="intro-desc">
+                        <ul>
+                            <li><strong style="color: #ffffff;">工作原理</strong>：當我們在命令列（Terminal）輸入指令（如 <code>python</code>）時，作業系統會自動到 <code>PATH</code> 變數所記錄的資料夾路徑中，尋找對應的執行檔（如 <code>python.exe</code>）。</li>
+                            <li><strong style="color: #ffffff;">重要性</strong>：若未將 Python 目錄加入 <code>PATH</code> 全域變數，在任何目錄下輸入 <code>python</code> 都會出現「無法識別此命令」的錯誤，迫使您每次都要輸入極長的絕對路徑，這會使 AI 自動化執行與人機協作完全卡住。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div style="margin-top: 2rem; margin-bottom: 2rem;">
+                <h3 style="font-size: 1.2rem; color: #ffffff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--accent);">✦</span> 補充1.3 安裝方法一：使用 Agent 自動安裝（推薦使用）
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                    如果您使用的是 Antigravity 2.0 系統，且已啟用終端機安全許可，您可以<strong>直接在對話中指示 AI 助理為您自動安裝與設定</strong>，這是對初學者最友善且不易出錯的方法：
+                </p>
+                <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid var(--accent-glow); border-radius: 8px; padding: 1.25rem;">
+                    <p style="color: #ffffff; font-weight: 500; margin-bottom: 0.75rem; font-size: 0.95rem;">💬 對話指令範例：</p>
+                    <blockquote style="border-left: 3px solid var(--accent); padding-left: 1rem; margin: 0; color: var(--text-muted); font-style: italic; font-size: 0.95rem;">
+                        「請幫我安裝最新穩定版 Python 並設定全域環境變數。」
+                    </blockquote>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem; margin-bottom: 0;">
+                        AI 助理會自動在背景呼叫 Windows 內建套件管理器 <code>winget</code> 執行安裝指令：<br>
+                        <code style="color: var(--accent); background: rgba(0,0,0,0.2); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace;">winget install Python.Python.3.12 --silent --accept-package-agreements</code><br>
+                        <code>winget</code> 將會<strong>自動完成全域 PATH 變數的配置</strong>，完全不需手動操作。
+                    </p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div style="margin-top: 2rem; margin-bottom: 2rem;">
+                <h3 style="font-size: 1.2rem; color: #ffffff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--primary);">✦</span> 補充1.4 安裝方法二：標準手動安裝步驟
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem;">
+                    如果您需要手動部署 Python 開發環境，可按照以下官方標準流程操作：
+                </p>
+                <ol style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.8; padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <li>前往 Python 官方網站下載專區 <a href="https://www.python.org/downloads/" target="_blank" style="color: var(--primary); text-decoration: underline;">python.org/downloads</a>，下載 <code>Windows installer (64-bit)</code>。</li>
+                    <li>雙擊執行下載的安裝檔.</li>
+                    <li><strong style="color: #ef4444;">【極為重要！】</strong>在安裝程式精靈的首頁底部，<strong>務必勾選「Add python.exe to PATH」</strong>複選框。</li>
+                    <li>點選 <strong style="color: #ffffff;">Install Now</strong> 進行標準安裝，完成後即可關閉安裝程式。</li>
+                </ol>
+            </div>
+
+            <div class="divider"></div>
+
+            <div style="margin-top: 2rem; margin-bottom: 2rem;">
+                <h3 style="font-size: 1.2rem; color: #ffffff; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--primary);">✦</span> 補充1.5 專案獨立執行環境的考量（全域 vs 虛擬環境 .venv）
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                    在安裝好基本 Python 環境後，未來隨著開發專案變多，我們會面臨是否要為各專案建立專屬虛擬環境的考量：
+                </p>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                        <thead>
+                            <tr style="border-bottom: 2px solid rgba(255, 255, 255, 0.1); text-align: left; color: #ffffff;">
+                                <th style="padding: 0.75rem 1rem; width: 15%;">比較項目</th>
+                                <th style="padding: 0.75rem 1rem; width: 42.5%;">全域環境 (Global Environment)</th>
+                                <th style="padding: 0.75rem 1rem; width: 42.5%;">專案虛擬環境 (Virtual Environment / .venv)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                <td style="padding: 0.75rem 1rem; font-weight: bold; color: #ffffff;">概念</td>
+                                <td style="padding: 0.75rem 1rem;">系統共用的唯一環境，所有套件都安裝在公共資料夾中。</td>
+                                <td style="padding: 0.75rem 1rem;">位於專案資料夾下的隔離環境，擁有獨立的 Python 核心與套件庫。</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                <td style="padding: 0.75rem 1rem; font-weight: bold; color: #ffffff;">建立指令</td>
+                                <td style="padding: 0.75rem 1rem;">無須手動建立，系統預設路徑。</td>
+                                <td style="padding: 0.75rem 1rem;">在專案根目錄下執行：<code>python -m venv .venv</code></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                <td style="padding: 0.75rem 1rem; font-weight: bold; color: #ffffff;">優缺點</td>
+                                <td style="padding: 0.75rem 1rem;">👍 簡單直覺，隨開隨用，適合初學者。<br>👎 套件過多時容易產生版本覆蓋或衝突。</td>
+                                <td style="padding: 0.75rem 1rem;">👍 套件完全隔離，開發環境乾淨穩定且便於團隊協作。<br>👎 每個專案會額外佔用約數十至數百 MB 的硬碟空間。</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                <td style="padding: 0.75rem 1rem; font-weight: bold; color: #ffffff;">推薦場景</td>
+                                <td style="padding: 0.75rem 1rem;"><span class="badge badge-primary">簡單學習、快速概念實作（如本手冊之題庫轉換）</span></td>
+                                <td style="padding: 0.75rem 1rem;"><span class="badge">商業系統開發、中大型專案、團隊協作開發</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid var(--primary-glow); border-radius: 8px; padding: 1.25rem;">
+                    <p style="color: #ffffff; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.95rem;">💡 Antigravity 與虛擬環境的對接機制：</p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin: 0;">
+                        當您在 Antigravity 中載入專案時，系統會自動在目錄中掃描是否存在 <code>.venv</code>（虛擬環境）或 <code>node_modules</code> 等資料夾。若存在，AI 助理在呼叫終端機指令或執行您的指令碼時，會<strong>優先採用該專案專屬的虛擬環境核心</strong>，以保證套件依賴的完全一致。
+                    </p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div style="margin-top: 2rem;">
+                <h3 style="font-size: 1.2rem; color: #ffffff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--primary);">✦</span> 補充1.6 驗證環境安裝
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                    安裝完成後，請打開系統的命令列工具（PowerShell 或 Command Prompt），依序執行以下指令進行驗證：
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                    <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 1.25rem;">
+                        <p style="color: #ffffff; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem;">1. 驗證 Python 核心：</p>
+                        <code style="color: var(--primary); font-family: monospace; display: block; margin-bottom: 0.5rem;">python --version</code>
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">預期輸出範例：<code>python --version</code> 執行將回傳如 <code>Python 3.12.x</code></span>
+                    </div>
+
+                    <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 1.25rem;">
+                        <p style="color: #ffffff; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem;">2. 驗證套件管理器 pip：</p>
+                        <code style="color: var(--primary); font-family: monospace; display: block; margin-bottom: 0.5rem;">pip --version</code>
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">預期輸出範例：回傳如 <code>pip 24.x from ...</code></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section id="interface-intro" class="section-card">
+            <h2 class="section-header">2. Antigravity 主介面功能導覽</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+                在開始實作前，請先認識 Antigravity 的主要介面功能分佈。
+            </p>
+
+            <div class="img-wrapper">
+                <img src="./images/antigravity_interface.png" alt="Antigravity 主介面圖解">
+            </div>
+
+            <div class="intro-grid">
+                <div class="intro-item">
+                    <div class="intro-name">頂部選單欄 (Top Menu Bar)</div>
+                    <div class="intro-desc">
+                        提供基礎的視窗控制與偵錯工具。可下拉開啟各選單執行詳細操作，如切換開發者工具、指令面板等。
+                    </div>
+                </div>
+                <div class="intro-item">
+                    <div class="intro-name">左側導覽邊欄 (Left Sidebar)</div>
+                    <div class="intro-desc">
+                        包含新建對話 (<span class="highlight">+ New Conversation</span>)、對話歷史、背景排程任務檢視，以及專案列表與系統設定齒輪。
+                    </div>
+                </div>
+                <div class="intro-item">
+                    <div class="intro-name">中央主工作區 (Workspace Panel)</div>
+                    <div class="intro-desc">
+                        您的主要互動對話框。支援使用 <span class="highlight">@</span> 來提及特定程式檔案，或使用 <span class="highlight">/</span> 執行快捷命令（如 /goal）。
+                    </div>
+                </div>
+                <div class="intro-item">
+                    <div class="intro-name">模型與環境選擇器</div>
+                    <div class="intro-desc">
+                        在輸入框下方可以切換使用的 AI 核心（如 <span class="highlight">Gemini 3.5 Flash (Medium)</span>）以及執行的環境介面（預設為 <span class="highlight">Local</span> 本地）。
+                    </div>
+                </div>
+                <div class="intro-item" style="grid-column: 1 / -1;">
+                    <div class="intro-name">右上角動作按鈕</div>
+                    <div class="intro-desc">
+                        <span class="highlight">Install IDE</span> 可以一鍵下載 VS Code 或 Cursor 的連結插件，安裝後能夠將 AI 的修改成果直接即時反應到您慣用的 IDE 原始碼編輯器中，讓協作無縫接軌。
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+            
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 頂部選單欄下拉選單詳解
+            </h3>
+
+            <div class="intro-grid">
+                <!-- Antigravity -->
+                <div class="intro-item" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div class="intro-name">Antigravity 選單</div>
+                        <div class="intro-desc">
+                            <ul>
+                                <li><span class="highlight">Version 2.0.11</span>：檢視當前版本。</li>
+                                <li><span class="highlight">Check for Updates</span>：線上檢查更新。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="img-wrapper" style="margin-top: 1.25rem; margin-bottom: 0;">
+                        <img src="./images/menu_antigravity.png" alt="Antigravity 選單">
+                    </div>
+                </div>
+                <!-- File -->
+                <div class="intro-item" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div class="intro-name">File 選單</div>
+                        <div class="intro-desc">
+                            <ul>
+                                <li><span class="highlight">New Conversation</span> (Ctrl+N)：開啟全新對話。</li>
+                                <li><span class="highlight">Create Project</span>：載入本地資料夾。</li>
+                                <li><span class="highlight">Command Palette</span> (Ctrl+Shift+P)：開啟全域指令面板。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="img-wrapper" style="margin-top: 1.25rem; margin-bottom: 0;">
+                        <img src="./images/menu_file.png" alt="File 選單">
+                    </div>
+                </div>
+                <!-- View -->
+                <div class="intro-item" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div class="intro-name">View 選單</div>
+                        <div class="intro-desc">
+                            <ul>
+                                <li><span class="highlight">Zoom In / Out / Reset</span>：縮放介面比例。</li>
+                                <li><span class="highlight">Toggle Developer Tools</span>：開啟偵錯工具 ( Console / F12 )，排查系統問題。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="img-wrapper" style="margin-top: 1.25rem; margin-bottom: 0;">
+                        <img src="./images/menu_view.png" alt="View 選單">
+                    </div>
+                </div>
+                <!-- Window -->
+                <div class="intro-item" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div class="intro-name">Window 選單</div>
+                        <div class="intro-desc">
+                            <ul>
+                                <li><span class="highlight">Minimize</span>：最小化軟體視窗。</li>
+                                <li><span class="highlight">Maximize</span>：最大化/還原視窗。</li>
+                                <li><span class="highlight">Close</span>：關閉應用程式。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="img-wrapper" style="margin-top: 1.25rem; margin-bottom: 0;">
+                        <img src="./images/menu_window.png" alt="Window 選單">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3 -->
+        <section id="project-creation" class="section-card">
+            <h2 class="section-header">3. 如何在 Antigravity 中建立專案與載入資料夾</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                引導學生將本地端的實作專案載入到 AI 開發環境中：
+            </p>
+
+            <div class="timeline">
+                
+                <!-- Timeline 1 -->
+                <div class="timeline-step">
+                    <div class="step-num">1</div>
+                    <div class="step-title"><span>Step 01.</span> 啟動建立選單</div>
+                    <div class="step-desc">
+                        滑鼠游標移至左側邊欄 <span class="highlight">Projects</span> 區塊，點選右邊的 <span class="highlight">+</span> 按鈕，在快顯選單中選取 <span class="highlight">New Project</span>。
+                    </div>
+                    <div class="img-wrapper">
+                        <img src="./images/create_project_step1.png" alt="點選 New Project">
+                    </div>
+                </div>
+
+                <!-- Timeline 2 -->
+                <div class="timeline-step">
+                    <div class="step-num">2</div>
+                    <div class="step-title"><span>Step 02.</span> 點擊新增資料夾</div>
+                    <div class="step-desc">
+                        在彈出的 <span class="highlight">Create Project</span> 對話框中，點選中央的 <span class="highlight">+ Add Folder</span> 以開啟檔案目錄選擇視窗。
+                    </div>
+                    <div class="img-wrapper">
+                        <img src="./images/create_project_step2.png" alt="點選 Add Folder">
+                    </div>
+                </div>
+
+                <!-- Timeline 3 -->
+                <div class="timeline-step">
+                    <div class="step-num">3</div>
+                    <div class="step-title"><span>Step 03.</span> 選擇本地專案路徑</div>
+                    <div class="step-desc">
+                        在 Windows 檔案選擇器中，導覽至您的專案資料夾（例如 `D:\AAA-Project\attn-class3`），並按下 <span class="highlight">選擇資料夾</span> 按鈕完成掛載。
+                    </div>
+                    <div class="img-wrapper">
+                        <img src="./images/create_project_step3.png" alt="選擇本地目錄">
+                    </div>
+                </div>
+
+            </div>
+        </section>        <!-- Section 5: PDF to CSV Conversion Practice -->
+        <section id="pdf-to-csv" class="section-card supplement-card">
+            <h2 class="section-header">補充2：實戰演練一 —— 使用單一提示詞自動化將 PDF 題庫轉換為 CSV 檔案 (PDF to CSV Conversion Practice)</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                在本章節中，我們將進行第一個實戰演練：將 IPAS 官方 PDF 題庫直接轉換為結構化的 CSV 題庫檔案，為後續建立題庫系統做好資料準備。
+            </p>
+
+            <div class="intro-grid" style="margin-bottom: 2rem;">
+                <div class="intro-item">
+                    <div class="intro-name">補充2.1 實戰版本一：直接分析網址 (網址轉檔版 - 推薦)</div>
+                    <div class="intro-desc">
+                        <p style="color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5; font-size: 0.9rem;">
+                            學員可以直接提供 AI 官方題庫的 PDF 網址，下達極簡的提示詞，由 AI 助理直接在網路抓取並下載解析。
+                        </p>
+                        <div class="prompt-box" style="padding: 1rem;">
+                            <p class="prompt-header" style="margin-bottom: 0.5rem;">
+                                <span>💬 對話指令範例：</span>
+                                <button class="copy-btn" onclick="copyPrompt(this)">複製指令</button>
+                            </p>
+                            <blockquote class="prompt-text" style="border-left: 3px solid #22d3ee; padding-left: 0.75rem; margin: 0; color: var(--text-muted); font-style: italic; font-size: 0.9rem; line-height: 1.5;">
+                                「請幫我讀取這個網址的 PDF：<code>https://drive.google.com/file/d/1wsP68afcDycEptNa3R44ShObBgaEeFG6/view?usp=sharing</code>，把裡面的 50 題選擇題整理並存成一個 CSV 題庫。產出的 CSV 檔案請命名為 <code>ipas_exam.csv</code>，欄位要包含：<code>題號</code>、<code>答案</code>、<code>題目描述</code>、<code>選項A</code>、<code>選項B</code>、<code>選項C</code>、<code>選項D</code>。請注意過濾掉頁首頁尾，並使用 UTF-8 BOM 編碼以防亂碼。」
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">補充2.2 實戰版本二：先下載後指定檔名 (本地檔案版)</div>
+                    <div class="intro-desc">
+                        <p style="color: var(--text-muted); margin-bottom: 0.75rem; line-height: 1.5; font-size: 0.9rem;">
+                            若因網路受限，可先下載 PDF 試題檔案更名為 <code>ipas_exam.pdf</code> 放進專案根目錄中。
+                        </p>
+                        
+                        <div style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem;">
+                            <span style="color: #f59e0b; font-weight: bold; font-size: 0.85rem;">💡 系統貼心備註：</span>
+                            <span style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4;">
+                                目前 Antigravity 對話框尚不支援直接以 <code>Ctrl+v</code> 複製貼上 PDF 等非圖片格式為對話附件（圖片可直接貼上），故處理 PDF 時需透過放入專案目錄並指定檔名的方式進行讀取。
+                            </span>
+                        </div>
+
+                        <div class="prompt-box" style="padding: 1rem;">
+                            <p class="prompt-header" style="margin-bottom: 0.5rem;">
+                                <span>💬 對話指令範例：</span>
+                                <button class="copy-btn" onclick="copyPrompt(this)">複製指令</button>
+                            </p>
+                            <blockquote class="prompt-text" style="border-left: 3px solid #22d3ee; padding-left: 0.75rem; margin: 0; color: var(--text-muted); font-style: italic; font-size: 0.9rem; line-height: 1.5;">
+                                「我已經下載題庫 PDF 存放在專案目錄中，檔名為 <code>ipas_exam.pdf</code>。請幫我讀取它並整理成 CSV 題庫。產出的 CSV 檔案請命名為 <code>ipas_exam.csv</code>，欄位要包含：<code>題號</code>、<code>答案</code>、<code>題目描述</code>、<code>選項A</code>、<code>選項B</code>、<code>選項C</code>、<code>選項D</code>。請注意過濾頁首頁尾，並使用 UTF-8 BOM 編碼。」
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div style="margin-top: 2rem; margin-bottom: 2rem;">
+                <h3 style="font-size: 1.2rem; color: #ffffff; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--primary);">✦</span> 補充2.3 遇到問題？直接與 AI 助理互動排錯！
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                    本章任務的特色在於學員<strong>不需要</strong>手動進行複雜的套件預裝或程式修改。遇到任何問題時，直接在對話中與 AI 互動即可解決：
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 1.25rem;">
+                        <p style="color: #ffffff; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.95rem;">🙋 情境 A：執行時出現找不到套件錯誤 (ModuleNotFoundError)</p>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem; line-height: 1.5;">
+                          執行時，終端機回報：<code>ModuleNotFoundError: No module named 'pypdf'</code>
+                        </p>
+                        <p style="color: var(--accent); font-size: 0.9rem; margin: 0; line-height: 1.5; font-weight: 500;">
+                          💬 直接對 AI 說：<code>「執行時提示找不到 pypdf 套件，請幫我安裝它並重新執行。」</code>
+                        </p>
+                    </div>
+
+                    <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 1.25rem;">
+                        <p style="color: #ffffff; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.95rem;">🙋 情境 B：產出的 CSV 用 Excel 開啟時全是中文亂碼</p>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem; line-height: 1.5;">
+                          用 Microsoft Excel 開啟 <code>ipas_exam.csv</code> 檔案，發現所有的中文字全變成看不懂的亂碼。
+                        </p>
+                        <p style="color: var(--accent); font-size: 0.9rem; margin: 0; line-height: 1.5; font-weight: 500;">
+                          💬 直接對 AI 說：<code>「我用 Excel 開啟輸出的 CSV 時出現中文亂碼，請幫我修正為帶有 BOM 的 UTF-8 編碼 (utf-8-sig) 重新存檔。」</code>
+                        </p>
+                    </div>
+
+                    <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 1.25rem;">
+                        <p style="color: #ffffff; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.95rem;">🙋 情境 C：跨頁處的題目文字有重複或截斷</p>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem; line-height: 1.5;">
+                          發現第 12 題與第 13 題在拼合時有些段落重複，或者題目文字被截斷。
+                        </p>
+                        <p style="color: var(--accent); font-size: 0.9rem; margin: 0; line-height: 1.5; font-weight: 500;">
+                          💬 直接對 AI 說：<code>「第 12 題和第 13 題在跨頁拼接處的文字有重複（或被截斷），請修正程式碼中的段落黏合邏輯，並重新產出 CSV。」</code>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Supplement 3: PDF & CSV Verification Practice -->
+        <section id="pdf-csv-verify" class="section-card supplement-card">
+            <h2 class="section-header">補充3：實戰演練二 —— 題庫內容比對與 HTML 驗證報告生成 (PDF & CSV Verification Practice)</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                在本章節中，我們將寫一個 Python 比對程式，自動校對我們在補充 2 中生成的 <code>ipas_exam.csv</code> 題庫與原本的 <code>ipas_exam.pdf</code>，以確保轉檔內容的正確性，並輸出精美的 HTML 比對報告。
+            </p>
+
+            <div class="intro-grid" style="margin-bottom: 2rem;">
+                <div class="intro-item">
+                    <div class="intro-name">補充3.1 實戰版本一：小白版 (Simple Prompt)</div>
+                    <div class="intro-desc">
+                        <p style="color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5; font-size: 0.9rem;">
+                            學員可以直接對 AI 發出簡單白話的比對需求，由 AI 助理自行設計程式邏輯與報告樣式。
+                        </p>
+                        <div class="prompt-box" style="padding: 1rem;">
+                            <p class="prompt-header" style="margin-bottom: 0.5rem;">
+                                <span>💬 對話指令範例：</span>
+                                <button class="copy-btn" onclick="copyPrompt(this)">複製指令</button>
+                            </p>
+                            <blockquote class="prompt-text" style="border-left: 3px solid #22d3ee; padding-left: 0.75rem; margin: 0; color: var(--text-muted); font-style: italic; font-size: 0.9rem; line-height: 1.5;">
+                                「請幫我比對專案目錄下的 <code>ipas_exam.pdf</code> 與 <code>ipas_exam.csv</code> 兩份檔案。我希望確認 CSV 轉換後的題號、答案、題目描述和選項是否與 PDF 內容完全一致。請用 Python 寫一個比對程式，執行比對後，產出一個精美的 HTML 檢查報告，命名為 <code>verification_report.html</code>，用顏色清楚標示哪些題目比對成功、哪些有差異。」
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">補充3.2 實戰版本二：精確版 (Precise Prompt)</div>
+                    <div class="intro-desc">
+                        <p style="color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5; font-size: 0.9rem;">
+                            給出清晰的防呆比對邏輯，並規定 HTML 報告的發光色系與儀表板規格。
+                        </p>
+                        <div class="prompt-box" style="padding: 1rem;">
+                            <p class="prompt-header" style="margin-bottom: 0.5rem;">
+                                <span>💬 對話指令範例：</span>
+                                <button class="copy-btn" onclick="copyPrompt(this)">複製指令</button>
+                            </p>
+                            <blockquote class="prompt-text" style="border-left: 3px solid #22d3ee; padding-left: 0.75rem; margin: 0; color: var(--text-muted); font-style: italic; font-size: 0.9rem; line-height: 1.5;">
+                                「請撰寫一個 Python 腳本 <code>verify_exam.py</code>，比對目錄下的 <code>ipas_exam.pdf</code> 與 <code>ipas_exam.csv</code>。
+<br><br>
+規格與比對邏輯如下：
+1. <b>資料讀取</b>：使用 <code>pypdf</code> 提取 <code>ipas_exam.pdf</code> 文字，並讀取 <code>ipas_exam.csv</code>。
+2. <b>比對機制</b>：對於 1 至 50 題，在 PDF 提取出的文字中搜尋該題的題目描述關鍵字（忽略空格與換行）與四個選項，檢查 CSV 欄位文字是否與 PDF 吻合，並驗證 CSV 中標記的「答案」是否與 PDF 公告答案一致。
+3. <b>HTML 報告格式</b>：產出 <code>verification_report.html</code>，排版需使用高質感的深色主題與磨砂玻璃風格。報告需包含：
+* <b>摘要數據</b>：總題數 (50)、完全一致題數、異常題數。
+* <b>詳細比對清單</b>：每一題的比對結果卡片。若比對完全一致，卡片邊框為綠色微光；若有差異（例如文字不匹配、選項遺漏或答案錯誤），邊框為紅色微光，並用黃字高亮標示出具體不一致的欄位與文字內容。
+* 腳本執行完畢後請自動生成此 HTML 檔。」
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div style="margin-top: 2rem; margin-bottom: 2rem;">
+                <h3 style="font-size: 1.2rem; color: #ffffff; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--primary);">✦</span> 補充3.3 遇到問題？直接與 AI 助理互動排錯！
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                    本演練的特色在於學員不需要手動除錯，比對程式遇到極端空格不匹配或網頁中文亂碼時，直接對對話框的 AI 發送微調指令：
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 1.25rem;">
+                        <p style="color: #ffffff; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.95rem;">🙋 情境 A：比對機制過於嚴格 (因換行或全半形空格造成全部失敗)</p>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem; line-height: 1.5;">
+                          執行比對時，因為 PDF 文字提取帶有隨機空格與換行，導致字串直接比對全數回報為不吻合。
+                        </p>
+                        <p style="color: var(--accent); font-size: 0.9rem; margin: 0; line-height: 1.5; font-weight: 500;">
+                          💬 直接對 AI 說：<code>「比對邏輯太嚴格了，請在比對題目描述與選項時，忽略所有空格、標點符號、換行以及全半形中英文字元的差異，只要核心文字語意吻合即可。」</code>
+                        </p>
+                    </div>
+
+                    <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 1.25rem;">
+                        <p style="color: #ffffff; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.95rem;">🙋 情境 B：產出的 HTML 驗證報告用瀏覽器開啟是亂碼</p>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem; line-height: 1.5;">
+                          雙擊 <code>verification_report.html</code> 檔案以瀏覽器開啟時，所有的中文全變成看不懂的亂碼。
+                        </p>
+                        <p style="color: var(--accent); font-size: 0.9rem; margin: 0; line-height: 1.5; font-weight: 500;">
+                          💬 直接對 AI 說：<code>「HTML 驗證報告檔案開啟時中文是亂碼，請在 Python 寫入 HTML 檔案時使用 UTF-8 編碼重新輸出。」</code>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <!-- Section 6 -->
+        <section id="settings-permissions" class="section-card">
+            <h2 class="section-header">4. 設定與安全權限管理 (Settings & Security Permissions)</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                點擊主介面左下角的 <span class="highlight">Settings</span> (齒輪圖示) 即可開啟設定選單。本節說明左側選單結構，以及 Account 帳號偏好、Permissions 安全權限的設定方法。
+            </p>
+
+            <div class="img-wrapper">
+                <img src="./images/settings_account.png" alt="設定與帳號面板">
+            </div>
+
+            <div class="intro-grid">
+                <div class="intro-item" style="grid-column: 1 / -1;">
+                    <div class="intro-name">設定左側選單總覽</div>
+                    <div class="intro-desc">
+                        <ul>
+                            <li><span class="highlight">General (一般)</span>：包含 Account (帳號/方案)、Permissions (安全權限)、Appearance (主題外觀)、Models (AI 模型管理)、Customizations (指令自訂)、Browser 與 App 設定。</li>
+                            <li><span class="highlight">Projects (專案專屬)</span>：可為如 <span class="highlight">attn-class3</span> 等載入的專案調整專用之沙盒與命令執行規則。</li>
+                            <li><span class="highlight">Not in Project (非專案對話)</span>：對未歸檔的對話進行列表管理。</li>
+                            <li><span class="highlight">Shortcuts & Feedback</span>：鍵盤快捷鍵對照表及意見回饋管道。</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="intro-item">
+                    <div class="intro-name">A. General - 遙測與行銷偏好</div>
+                    <div class="intro-desc">
+                        <ul>
+                            <li><span class="highlight">Enable Telemetry</span>：收集匿名診斷數據協助 Google 改進效能與功能（建議保持開啟）。</li>
+                            <li><span class="highlight">Marketing Emails</span>：訂閱產品最新的更新、小技巧與推廣信件。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">B. Account - 帳號與訂閱管理</div>
+                    <div class="intro-desc">
+                        <ul>
+                            <li><span class="highlight">Your Plan</span>：顯示目前訂閱方案（畫面上為極致效能的 <span class="highlight">Google AI Ultra</span> 方案）。</li>
+                            <li><span class="highlight">Email & Sign Out</span>：顯示目前綁定的 Google 電子郵件帳號，點擊 Sign Out 可登出。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> Permissions 權限配置面板詳解
+            </h3>
+
+            <div class="img-wrapper">
+                <img src="./images/settings_permissions.png" alt="安全權限配置面板">
+            </div>
+
+            <div class="intro-grid">
+                <div class="intro-item">
+                    <div class="intro-name">Project-Specific Settings (專案專屬安全設定)</div>
+                    <div class="intro-desc">
+                        雖然有全域限制，但點選 <span class="highlight">Go To Projects</span> 可跳轉至個別專案設定，配置各別專案的獨立執行沙盒環境（Sandbox）與終端機命令執行規則，讓不同專案擁有不同的信任等級。
+                    </div>
+                </div>
+                <div class="intro-item">
+                    <div class="intro-name">File Permissions (檔案權限管理)</div>
+                    <div class="intro-desc">
+                        防範 AI 誤讀或誤寫您電腦中的機密目錄。<span class="highlight">File Access Rules</span> 用於設定「路徑白名單」與「路徑黑名單」，預設情況下 AI 僅有權存取掛載專案內的檔案，若有需要讀寫外部特定資料夾，需在此處配置放行。
+                    </div>
+                </div>
+                <div class="intro-item">
+                    <div class="intro-name">Network Permissions (網路權限管理)</div>
+                    <div class="intro-desc">
+                        限制 AI 上網抓取資料的連線範圍。<span class="highlight">Network Access Rules</span> 可設定允許或禁止 AI 讀取與存取的特定網路網址 (URLs) 或網域 (Domains)，確保資料不會外洩至未授權的網域。
+                    </div>
+                </div>
+                <div class="intro-item">
+                    <div class="intro-name">Terminal & Tooling Permissions (終端指令與外部工具權限)</div>
+                    <div class="intro-desc">
+                        <ul>
+                            <li><span class="highlight">Terminal Commands</span>：當 AI 提出要在系統中直接執行終端命令（如 npm run dev、git 等）時的安全授權。*標記數字 (如 1) 代表目前已有 1 個已配置的指令規則*。</li>
+                            <li><span class="highlight">Commands Outside Sandbox</span>：預設指令在隔離沙盒 (Sandbox) 中執行。若有些指令需要操作真實主機環境，需在此處特許放行。</li>
+                            <li><span class="highlight">MCP Tools</span>：設定 Model Context Protocol (MCP) 連線，透過對接外部 MCP 伺服器來擴充 AI 的工具庫（例如操作資料庫或串接特定 API）。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7 -->
+        <section id="settings-appearance" class="section-card">
+            <h2 class="section-header">5. 外觀與對話顯示設定 (Appearance & Chat Display Settings)</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                點擊主介面左下角 <span class="highlight">Settings</span>，選擇左側 <span class="highlight">Appearance</span> 即可查閱或調整外觀與顯示偏好。
+            </p>
+
+            <div class="img-wrapper">
+                <img src="./images/settings_appearance.png" alt="外觀設定面板">
+            </div>
+
+            <div class="intro-grid">
+                <div class="intro-item">
+                    <div class="intro-name">A. Chat Settings - 詳細對話思考過程</div>
+                    <div class="intro-desc">
+                        <span class="highlight">Verbose agent chat</span>：啟用後，會展示並在對話中保留 AI 助理輸出最終程式碼前的 **思考步驟 (Thinking Steps)**。這對學生理解 AI 的推理邏輯與 Debug 有極大的學習價值！
+                    </div>
+                </div>
+                
+                <div class="intro-item">
+                    <div class="intro-name">B. Theme Mode - 亮暗色主題切換</div>
+                    <div class="intro-desc">
+                        <span class="highlight">Appearance</span>：下拉選單可切換亮色 (Light)、暗色 (Dark) 主題，或是跟隨系統的設定模式。
+                    </div>
+                </div>
+
+                <div class="intro-item" style="grid-column: 1 / -1;">
+                    <div class="intro-name">C. Presets & Colors - 個性化配色微調</div>
+                    <div class="intro-desc">
+                        支援使用者微調亮暗色主題的 Preset，且提供內建色彩調色盤，可直接修改 **背景色 (Background)**、**前景色 (Foreground)** 及 **強調色 (Accent)**，打造更舒適、具科技感的程式開發介面。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8 -->
+        <section id="settings-models" class="section-card">
+            <h2 class="section-header">6. AI 模型與配額管理 (AI Models & Quotas)</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                點擊主介面左下角 <span class="highlight">Settings</span>，選擇左側 <span class="highlight">Models</span> 即可配置 AI 模型運作規則，並隨時掌握額度剩餘狀態。
+            </p>
+
+            <div class="img-wrapper">
+                <img src="./images/settings_models.png" alt="模型設定面板">
+            </div>
+
+            <div class="intro-grid">
+                <div class="intro-item">
+                    <div class="intro-name">A. Model Credits - 超額付費點數開關</div>
+                    <div class="intro-desc">
+                        <span class="highlight">Enable AI Credit Overages</span>：關閉時，若配額用盡將暫時無法調用模型；若開啟，系統會在免費配額耗盡時自動以 Credits 點數填補，讓專案實作不中斷。系統始終優先消耗免費配額。
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">B. Model Quota - 配額狀態與重設倒數</div>
+                    <div class="intro-desc">
+                        Antigravity 彙整了多種頂尖 AI 模型。每個模型下方均有獨立剩餘額度進度條，且右側精準標記了**額度自動重新整理 (Refresh) 的剩餘時間** (例如 4 小時 19 分)，利於學生管理分配額度。
+                    </div>
+                </div>
+
+                <div class="intro-item" style="grid-column: 1 / -1;">
+                    <div class="intro-name">C. 支援的 AI 開發模型陣容</div>
+                    <div class="intro-desc">
+                        <ul>
+                            <li><span class="highlight">Gemini 系列</span>：包含極速開發的 Gemini 3.5 Flash (分為 High/Medium/Low 配額通道) 與深度推理的 Gemini 3.1 Pro 系列。</li>
+                            <li><span class="highlight">Claude 系列</span>：包含強大程式編寫能力的 Claude Sonnet 4.6 (Thinking) 與 Claude Opus 4.6 (Thinking)。</li>
+                            <li><span class="highlight">GPT-OSS 系列</span>：連線社群開源的高參數量模型 GPT-OSS 120B。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 9 -->
+        <section id="settings-customizations" class="section-card">
+            <h2 class="section-header">7. 自訂指令與外掛技能管理 (Customizations & Skills)</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                點擊主介面左下角 <span class="highlight">Settings</span>，選擇左側 <span class="highlight">Customizations</span>。在沒有載入任何額外插件或自訂規則的<strong>一般正常狀態</strong>下，其管理面板如下所示：
+            </p>
+
+            <div class="img-wrapper">
+                <img src="./images/settings_customizations_clean.png" alt="自訂指令與外掛技能設定面板 (一般正常狀態)">
+            </div>
+
+            <div class="intro-grid">
+                <div class="intro-item">
+                    <div class="intro-name">Token Usage - 自訂資源配額</div>
+                    <div class="intro-desc">
+                        顯示目前載入的技能、自訂規則與 MCP 伺服器所佔用的 Token 配額限制。在乾淨狀態下會顯示為 <span class="highlight">100.0% of the customization budget is available.</span>。若裝載了過多技能導致超過上限，部分自訂行為會被系統自動截斷。
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">Installed MCP Servers - 外部工具伺服器</div>
+                    <div class="intro-desc">
+                        列出目前安裝的 Model Context Protocol 伺服器。在乾淨狀態下會顯示為 <span class="highlight">No MCP Servers</span>，學生可以點選 <code style="color: #ffffff;">Add MCP +</code> 自行連接外部伺服器或資料庫。
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 7.3 外掛技能的擴充與管理機制 (新增、刪除與停用)
+            </h3>
+
+            <!-- Warning Banner for Dialog-based management -->
+            <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                <span style="color: var(--primary); font-weight: 700; font-size: 1rem; display: block; margin-bottom: 0.5rem;">⚠️ 重要教學觀念：</span>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">
+                    <strong>目前版本的自訂外掛技能 (Skills) 新增與刪除在設定面板上是沒有獨立的管理按鈕的。目前暫時需要依靠「與 AI 進行對話互動（例如請 AI 將某段流程打包提煉成技能）」來自動產生，或是「在電腦的檔案總管中手動建立與刪除資料夾檔案」來完成管理。</strong>
+                </p>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                外掛技能 (Skills) 不是一成不變的，學生與開發者可以依據專案開發需求，自由擴充自訂技能或清理/停用不必要的技能：
+            </p>
+
+            <div class="intro-grid" style="margin-bottom: 2rem;">
+                <div class="intro-item">
+                    <div class="intro-name">1. 如何「新增」自訂外掛技能</div>
+                    <div class="intro-desc">
+                        <ul style="list-style-type: none; padding-left: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                            <li>
+                                <strong style="color: #ffffff;">A. 自動提煉 (工作流生成)：</strong><br>
+                                當在對話中與 AI 完成了一連串複雜的開發流程或 API 串接後，可直接下達指令：<br>
+                                <span class="highlight" style="font-style: italic; display: inline-block; margin-top: 0.25rem;">「請將我們剛才完成的這個開發流程，打包提煉成一個新的 Skill。」</span><br>
+                                系統將自動叫用 <code style="color: var(--accent); background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px;">workflow_skill_creator</code> 技能，透過引導問答確認輸入輸出後，在對應資料夾內為您產生 <code style="color: #ffffff;">SKILL.md</code> 與輔助執行腳本。
+                            </li>
+                            <li style="border-top: 1px dashed rgba(255, 255, 255, 0.08); padding-top: 0.75rem;">
+                                <strong style="color: #ffffff;">B. 手動建立：</strong><br>
+                                技能的本質為一個包含 <code style="color: #ffffff;">SKILL.md</code> 的資料夾。您可以直接建立該資料夾並撰寫包含 YAML 標頭的 Markdown 檔案：
+                                <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                                    • <strong>專案專屬 (Local)</strong>：放置於專案根目錄的 <code style="color: var(--primary);">.agents/skills/自訂技能名稱/</code><br>
+                                    • <strong>全域通用 (Global)</strong>：放置於全域目錄 <code style="color: var(--primary);">C:\Users\user\.gemini\config\skills/自訂技能名稱/</code>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">2. 如何「刪除」與「停用」外掛技能</div>
+                    <div class="intro-desc">
+                        <ul style="list-style-type: none; padding-left: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                            <li>
+                                <strong style="color: #ffffff;">A. 刪除與停用預設的 Plugins (如 Science 插件下的 38 個 Skills)：</strong><br>
+                                這些是由系統內建的 Google 插件包提供的。點擊 <code style="color: #ffffff;">General</code> -> <code style="color: #ffffff;">Customizations</code> 裡的 <strong style="color: var(--primary);">Build With Google Plugins</strong> 可以進入插件管理頁面。在右側您可以點擊 <strong style="color: #ef4444;">Delete (刪除)</strong> 按鈕，直接將整包套件及其包含的所有預設 Skills 從您的系統中實體移除。
+                            </li>
+                            <li style="border-top: 1px dashed rgba(255, 255, 255, 0.08); padding-top: 0.75rem;">
+                                <strong style="color: #ffffff;">B. 刪除自訂的 Skills：</strong><br>
+                                不論是 Local 還是 Global 的自訂 Skill，您只需要直接至對應資料夾下，<strong>將該 Skill 的資料夾刪除或移出該目錄</strong>，重新啟動對話或重載系統後，該 Skill 就不會再出現在列表中。
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="img-wrapper" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                <img src="./images/settings_customizations_plugins.png" alt="Build With Google Plugins 插件管理與刪除介面">
+            </div>
+
+            <div class="divider"></div>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 7.4 系統預載 39 個核心外掛技能 (Skills) 詳解
+            </h3>
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 1.25rem; margin-top: 1rem; margin-bottom: 1.5rem;">
+                <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; margin: 0;">
+                    <strong style="color: var(--primary);">備註：</strong>系統在某些版本或平台下安裝後，會預設啟用與下載這 39 個核心外掛技能（例如內建的 <code>science</code> 與 <code>android-cli-plugin</code> 等插件所屬的 Skills）。若您的專案並不需要這些學術或行動開發相關工具，可在 <strong>7.3</strong> 中透過插件管理面板點選 <strong style="color: #ef4444;">Delete</strong> 將整包插件卸載，以最大化釋放您的 Token 額度並清空客製化預算。
+                </p>
+            </div>
+
+            <details class="skill-dropdown" style="border-color: rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.05); margin-bottom: 1.5rem;">
+                <summary class="skill-summary" style="color: var(--primary); font-weight: 600;">
+                    <span>📦 點擊展開 / 收起 39 個預載核心外掛技能 (Skills) 詳細列表</span>
+                </summary>
+                <div class="skill-content" style="padding-top: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+
+            <!-- 39 Collapsible Dropdowns -->
+
+            <!-- Skill 1 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">1. alphafold-database-fetch-and-analyze</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>蛋白質結構預測分析。透過 UniProt Accession ID 抓取並分析蛋白質 3D 結構，評估結構信賴度 (pLDDT) 及無序區段。</p>
+                    <p><strong>適用時機：</strong>當使用者提供特定的 UniProt ID 且需要結構信賴度度量、結構域邊界分析時使用。若只有蛋白質、基因名稱或氨基酸序列，請先詢問 UniProt ID。</p>
+                </div>
+            </details>
+
+            <!-- Skill 2 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">2. alphagenome-single-variant-analysis</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>基因變異效應預測。利用 AlphaGenome API 分析非編碼基因變異對基因表現量 (RNA-seq)、染色質開放性 (DNASE) 以及轉錄因子結合的影響。</p>
+                    <p><strong>適用時機：</strong>使用者查詢非編碼區段變異的致病性、臨床顯著性、剪接位點破壞或啟動子調控效應時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 3 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">3. android-cli</span>
+                    <span class="skill-badge">Plugin: android-cli-plugin</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>Android 命令列開發工具。使用 `android` CLI 執行專案建立、模擬器部署、SDK 管理及環境診斷。</p>
+                    <p><strong>適用時機：</strong>使用者需要進行 Android 行動應用程式開發、編譯或環境測試時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 4 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">4. chembl-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>ChEMBL 藥物活性與化學結構資料庫。查詢活性小分子、藥物靶點、IC50/Ki 活性值及藥物作用機制。</p>
+                    <p><strong>適用時機：</strong>查詢特定化合物或小分子藥物的靶向活性及化學結構特徵時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 5 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">5. clinical-trials-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>美國臨床試驗資料庫檢索。透過 API 檢索 ClinicalTrials.gov 的試驗狀態、招募條件、NCT 編號詳情及贊助商。</p>
+                    <p><strong>適用時機：</strong>當需要搜尋特定疾病的臨床試驗、招募狀態或患者資格條件匹配時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 6 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">6. clinvar-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>ClinVar 基因變異致病性資料庫。提供人類基因體變異的臨床顯著性與致病性分類 (如 Pathogenic、Benign、VUS)。</p>
+                    <p><strong>適用時機：</strong>需要尋找特定突變在醫學上的致病證據或基準對照組時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 7 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">7. dbsnp-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>dbSNP 短基因變異資料庫。將 rsID、基因體 VCF 座標或 HGVS 格式字串相互轉換，回傳變異位置、人群頻率及關聯基因。</p>
+                    <p><strong>適用時機：</strong>當需要查詢特定 SNP 位點的染色體位置、等位基因頻率或疾病相關性時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 8 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">8. embl-ebi-ols</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>EMBL-EBI 生物本體論查詢服務。提供 250 多個生醫學本體論（如 GO, DOID, HP）的術語階層與定義查詢。</p>
+                    <p><strong>適用時機：</strong>當需要解析生醫專有名詞、定位本體論節點或其父子關係時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 9 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">9. encode-ccres-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>ENCODE 順式調控元件資料庫。查詢人類細胞中的調控元件（cCREs，如啟動子、增強子）及 ENCODE Portal 下的原始表觀遺傳學檔案。</p>
+                    <p><strong>適用時機：</strong>需要分析特定細胞株中的轉錄調控區域或表觀基因體學峰值 (Peaks) 時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 10 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">10. ensembl-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>Ensembl 基因體與變異預測資料庫。作為主 ID 轉換器，查詢基因/轉錄本/蛋白質序列，並取得變異後果預測 (VEP)。</p>
+                    <p><strong>適用時機：</strong>需要轉換 ID、下載外顯子結構或查詢特定突變對蛋白質結構的預測影響時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 11 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">11. foldseek-structural-search</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>Foldseek 蛋白質 3D 結構相似度比對。使用 PDB/CIF 三維座標檔案在 AlphaFold DB 或 PDB 中搜尋結構相似的蛋白質。</p>
+                    <p><strong>適用時機：</strong>使用者提供實體 3D 結構檔，並希望尋找演化上結構保守的同源蛋白質。</p>
+                </div>
+            </details>
+
+            <!-- Skill 12 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">12. gnomad-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>gnomAD 人群基因組變異資料庫。提供全基因體/外顯子體變異人群頻率、基因體耐受度指標（pLI, LOEUF）。</p>
+                    <p><strong>適用時機：</strong>評估突變是否為罕見變異，或評估該基因是否對功能喪失變異敏感。</p>
+                </div>
+            </details>
+
+            <!-- Skill 13 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">13. gtex-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>GTEx 人類組織基因表現量資料庫。提供 54 個非疾病人體組織中的 RNA 表現數據及變異表現量關聯 (eQTL)。</p>
+                    <p><strong>適用時機：</strong>查詢特定基因在正常人體組織中的表現特異性，或研究變異對特定組織表現量的影響。</p>
+                </div>
+            </details>
+
+            <!-- Skill 14 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">14. human-protein-atlas-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>人類蛋白質圖譜。提供半定量蛋白質表現數據，以及蛋白質在細胞內的定位與免疫組織化學染色結果。</p>
+                    <p><strong>適用時機：</strong>當需要確認蛋白質在人體不同組織中的空間定位與真實表現情形時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 15 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">15. interpro-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>InterPro 蛋白質家族與結構域資料庫。識別蛋白質序列中的結構域 (Domain)、功能特徵位點及進行 GO 註解。</p>
+                    <p><strong>適用時機：</strong>分析未知功能蛋白質序列的保守結構域或分類。</p>
+                </div>
+            </details>
+
+            <!-- Skill 16 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">16. jaspar-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>JASPAR 轉錄因子結合矩陣資料庫。查詢轉錄因子的位置頻率矩陣 (PFM) 或位置權重矩陣 (PWM) 以及元數據。</p>
+                    <p><strong>適用時機：</strong>當需要預測特定轉錄因子的 DNA 結合特徵或轉換矩陣格式時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 17 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">17. literature-search-arxiv</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>arXiv 學術文獻檢索。搜尋 arXiv 預印本論文，擷取文獻元數據、摘要並下載 PDF。</p>
+                    <p><strong>適用時機：</strong>查詢最新的電腦科學、數學、計算生物學預印本論文。</p>
+                </div>
+            </details>
+
+            <!-- Skill 18 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">18. literature-search-biorxiv</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>bioRxiv/medRxiv 生物醫學預印本檢索。瀏覽、篩選並下載生物及醫學界的預印本文獻。</p>
+                    <p><strong>適用時機：</strong>需要快速取得最新（尚未經同儕審查）的生物醫學研究發現。</p>
+                </div>
+            </details>
+
+            <!-- Skill 19 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">19. literature-search-europepmc</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>Europe PMC 生物醫學文獻檢索。提供數百萬篇生醫論文、全文摘要、引用連結檢索及 PDF 下載。</p>
+                    <p><strong>適用時機：</strong>當需要廣泛檢索醫學與生命科學文獻並提取全文時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 20 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">20. literature-search-openalex</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>OpenAlex 全球學術圖譜。可透過 DOI 查詢文獻，計算作者引用指標、h-index、期刊影響因子及學術機構產出。</p>
+                    <p><strong>適用時機：</strong>分析文獻引用關係、學術網絡或進行大範圍文獻統計計量時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 21 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">21. ncbi-sequence-fetch</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>NCBI 生物序列下載。使用 E-utilities 下載 DNA、RNA、質體或蛋白質的 FASTA 序列。</p>
+                    <p><strong>適用時機：</strong>需要利用 NCBI 登入號 (Accession Number) 快速獲取基因或蛋白質序列時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 22 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">22. openfda-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>美國 openFDA 食品藥物監管數據庫。查詢藥物與醫材的上市後不良反應、說明標籤、短缺及核准紀錄。</p>
+                    <p><strong>適用時機：</strong>調查藥物安全性、藥品仿單（Labeling）或醫療器材警戒時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 23 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">23. opentargets-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>Open Targets 藥物靶點發現平台。提供基因-疾病關聯強度、靶點成藥性 (Tractability) 及已知臨床藥物。</p>
+                    <p><strong>適用時機：</strong>當在評估某基因是否適合作為新藥開發的靶點，或查詢其安全評估時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 24 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">24. pdb-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>PDB 大分子實驗結構資料庫。檢索並下載實驗测定的生物大分子（蛋白質、核酸）3D 結構，支持序列或結構相似性搜索。</p>
+                    <p><strong>適用時機：</strong>需要獲取已發表的蛋白質實驗晶體結構模型（PDB 檔案）時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 25 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">25. protein-sequence-msa</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>Clustal Omega 多重序列比對。針對多條蛋白質序列進行對齊，用以評估氨基酸保守性或辨識演化關係。</p>
+                    <p><strong>適用時機：</strong>需要比對多個同源基因或蛋白質序列的異同。</p>
+                </div>
+            </details>
+
+            <!-- Skill 26 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">26. protein-sequence-similarity-search</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>MMseqs2/BLAST 序列同源搜尋。依據給定的蛋白質序列，在各大公共資料庫中尋找同源或序列相似的蛋白質。</p>
+                    <p><strong>適用時機：</strong>拿到一條未知序列，需要透過同源性比對來推測其蛋白質功能時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 27 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">27. pubchem-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>PubChem 化學分子與藥物資料庫。透過名稱、CID 或 SMILES 搜尋化學物質、查詢物理性質及生物活性。</p>
+                    <p><strong>適用時機：</strong>需要查詢化學小分子的分子量、拓撲極性表面積（TPSA）、毒性或同源小分子結構時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 28 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">28. pubmed-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>PubMed 文獻與分子關聯資料庫。檢索 MEDLINE 數據，並將文獻關聯到基因、蛋白質及 PubChem 小分子上。</p>
+                    <p><strong>適用時機：</strong>精準檢索特定突變或藥物在學術論文中的研究紀錄。</p>
+                </div>
+            </details>
+
+            <!-- Skill 29 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">29. pymol</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>PyMOL 3D 結構渲染與分析。控制 PyMOL 軟體對蛋白質結構進行 3D 著色、標記結合位、測量原子距離與疊合結構。</p>
+                    <p><strong>適用時機：</strong>當使用者需要展示蛋白質結合腔的立體結構、高畫質渲染出圖或比對兩個蛋白質結構時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 30 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">30. quickgo-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>QuickGO 基因功能本體論檢索。查詢特定基因的生物學過程、細胞定位及分子功能註解 (Gene Ontology)。</p>
+                    <p><strong>適用時機：</strong>需要確認特定蛋白質在細胞內發揮何種功能、參與什麼生理途徑時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 31 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">31. reactome-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>Reactome 生物學通路資料庫。查詢代謝與反應通路、進行基因集富集分析 (Enrichment) 及通路階層檢索。</p>
+                    <p><strong>適用時機：</strong>需要研究某一組差異表現基因主要富集在哪些人體代謝通路時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 32 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">32. science-skills-common</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>生醫科學工具共用底層套件。包含統一的連線重試、限速與 API 連線模組，供其他 Science 工具底層叫用。</p>
+                    <p><strong>適用時機：</strong>此為後台共用模組，使用者與 AI 不直接單獨調用。</p>
+                </div>
+            </details>
+
+            <!-- Skill 33 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">33. scienceskillscommon</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>生醫科學工具共用底層複本。輔助提供限速連線模組，維持底層套件穩定度。</p>
+                    <p><strong>適用時機：</strong>後台共用模組，使用者與 AI 不直接單獨調用。</p>
+                </div>
+            </details>
+
+            <!-- Skill 34 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">34. string-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>STRING 蛋白質交互作用資料庫。查詢蛋白質之間的已知物理接觸與功能性網絡，包含交互證據與信賴評分。</p>
+                    <p><strong>適用時機：</strong>需要建構蛋白質交互作用網絡圖 (PPI Network) 或尋找其上下游關聯蛋白時。</p>
+                </div>
+            </details>
+
+            <!-- Skill 35 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">35. ucsc-conservation-and-tfbs</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>UCSC 基因體保守性與轉錄因子結合區。從 UCSC 獲取演化保守性評分 (phyloP/phastCons) 及轉錄因子結合區間 (TFBS)。</p>
+                    <p><strong>適用時機：</strong>分析某基因突變位點是否位於演化上極度保守的重要調控區域。</p>
+                </div>
+            </details>
+
+            <!-- Skill 36 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">36. unibind-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>UniBind 轉錄因子結合位點實驗資料庫。下載經過實驗 (ChIP-seq) 驗證的真實轉錄因子-DNA 結合位點坐標。</p>
+                    <p><strong>適用時機：</strong>下載特定的 TF 結合位置 BED 檔案，以進行本地生物資訊學分析。</p>
+                </div>
+            </details>
+
+            <!-- Skill 37 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">37. uniprot-database</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>UniProt 蛋白質知識庫。生醫領域最具代表性的蛋白質數據庫，查詢功能描述、分類特徵、活性位點與序列變異。</p>
+                    <p><strong>適用時機：</strong>查詢蛋白質功能、結構特徵或變異後後果的基本背景資訊。</p>
+                </div>
+            </details>
+
+            <!-- Skill 38 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">38. uv</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>uv Python 套件快速安裝管理器。檢查並在環境中配置高效能 Python 套件管理器 uv，加速科學運算套件的部署。</p>
+                    <p><strong>適用時機：</strong>當系統執行其他需要安裝相依 Python 套件的工具前作為預備步驟。</p>
+                </div>
+            </details>
+
+            <!-- Skill 39 -->
+            <details class="skill-dropdown">
+                <summary class="skill-summary">
+                    <span class="skill-name">39. workflow-skill-creator</span>
+                    <span class="skill-badge">Plugin: science</span>
+                </summary>
+                <div class="skill-content">
+                    <p><strong>說明：</strong>工作流技能提煉生成器。將使用者完成的複雜多步驟工作流或交互歷程，精簡編寫成一個 AI 可以重用的自訂技能 (Skill)。</p>
+                    <p><strong>適用時機：</strong>當使用者指示「將我們剛剛完成的步驟打包成一個 Skill」時使用。</p>
+                </div>
+            </details>
+                </div>
+            </details>
+        </section>
+
+        <!-- Section 10 -->
+        <section id="settings-browser" class="section-card">
+            <h2 class="section-header">8. 瀏覽器自動化設定 (Browser Settings)</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                點擊主介面左下角 <span class="highlight">Settings</span>，選擇左側 <span class="highlight">Browser</span>。此功能允許 AI 在對話框中使用 <span class="highlight">/browser</span> 命令，啟動瀏覽器代理程式進行網頁自動化或內容搜尋。
+            </p>
+
+            <div class="img-wrapper">
+                <img src="./images/settings_browser.png" alt="瀏覽器自動化設定面板">
+            </div>
+
+            <div class="intro-grid">
+                <div class="intro-item">
+                    <div class="intro-name">Browser Javascript Execution Policy (JS 執行原則)</div>
+                    <div class="intro-desc">
+                        決定是否允許 AI 對載入的網頁執行自訂 JavaScript。當前設為 <span class="highlight">Disabled</span> (已停用)，可保護主機免受惡意 JS 操作，在進行高階網頁自動化交互測試時才需要開啟。
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">Browser Actuation Rules (網域操作白名單)</div>
+                    <div class="intro-desc">
+                        點擊 <span class="highlight">Edit</span> 可以進入白名單/黑名單子視窗，指定哪些網址 URLs 或 Domain 是允許 AI 進行自動點擊、輸入或操作，保障自動瀏覽時的安全範圍。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 11 -->
+        <section id="settings-app" class="section-card">
+            <h2 class="section-header">9. 應用程式基礎設定 (App Settings)</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                點擊主介面左下角 <span class="highlight">Settings</span>，選擇左側 <span class="highlight">App</span> 即可管理應用程式的運作模式以及通知管道。
+            </p>
+
+            <div class="img-wrapper">
+                <img src="./images/settings_app.png" alt="應用程式設定面板">
+            </div>
+
+            <div class="intro-grid">
+                <div class="intro-item">
+                    <div class="intro-name">A. General - 防休眠與選單常駐</div>
+                    <div class="intro-desc">
+                        <ul>
+                            <li><span class="highlight">Prevent Sleep</span>：啟用時會防止電腦在軟體執行（如背景繁重任務）中自動休眠，避免工作中斷。</li>
+                            <li><span class="highlight">Keep In Menu Bar</span>：關閉視窗後仍在 Windows 系統工作列背景常駐運行，實現秒開。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">B. Notifications - 系統通知對接</div>
+                    <div class="intro-desc">
+                        點擊 <span class="highlight">Open System Preferences</span> 會開啟 Windows 作業系統通知控制面板，以決定是否接收背景任務完成或計時器觸發的彈出式橫幅通知。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 12 -->
+        <section id="custom-skills-practice" class="section-card">
+            <h2 class="section-header">10. 實戰演練 - 建立與管理第一個自訂 Skill</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                本章節帶領學生在專案中實際建立一個自訂 Skill，並說明如何驗證其載入效果，以及解釋為何在軟體設定介面中找不到「刪除自訂 Skill」按鈕。
+            </p>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 10.1 建立步驟與偵測
+            </h3>
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
+                <ol style="margin-left: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; color: var(--text-muted);">
+                    <li>
+                        <strong style="color: #ffffff;">建立資料夾</strong>：<br>
+                        在您的專案根目錄下，進入（或新建）<code style="color: var(--primary);">.agents/skills/</code> 資料夾，並在其中建立一個與 Skill 同名的新資料夾，例如 <code style="color: var(--primary);">hello-world-helper</code>。
+                    </li>
+                    <li>
+                        <strong style="color: #ffffff;">撰寫 SKILL.md</strong>：<br>
+                        在 <code style="color: var(--primary);">hello-world-helper</code> 底下建立一個 <code style="color: #ffffff;">SKILL.md</code> 檔案，定義其 YAML 標頭（包含 <code style="color: var(--accent);">name</code> 與 <code style="color: var(--accent);">description</code>）與功能描述。
+                    </li>
+                    <li>
+                        <strong style="color: #ffffff;">查看載入效果</strong>：<br>
+                        點擊主介面左下角 **Settings (齒輪)**，在左側 **Projects** 清單中點選您的專案（例如 <span class="highlight">attn-class3</span>）。往下滑動至 Skills 列表，您會看到系統已經動態且自動地將我們建立的 <code style="color: var(--primary);">hello-world-helper</code> 載入！
+                    </li>
+                </ol>
+            </div>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 10.2 為什麼在 Skills 列表中找不到「刪除自訂 Skill」的按鈕？
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                如下圖所示，當我們進入專案設定頁面時，可以清楚看見載入的自訂 Skill，但卻沒有刪除鍵：
+            </p>
+
+            <div class="img-wrapper" style="margin-bottom: 2rem;">
+                <img src="./images/project_custom_skill.png" alt="自訂技能載入與專案設定面板">
+            </div>
+
+            <div class="intro-grid">
+                <div class="intro-item">
+                    <div class="intro-name">僅提供 Copy (複製) 功能</div>
+                    <div class="intro-desc">
+                        在專案的技能列表中，<code style="color: var(--primary);">hello-world-helper</code> 旁僅有一個「複製」圖示，<strong>沒有任何 Delete (刪除) 鍵</strong>。這是因為 Antigravity 採用了「實體目錄掃描」機制。
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">安全保護設計與手動移除</div>
+                    <div class="intro-desc">
+                        為了防止使用者在軟體操作時，不小心誤刪專案硬碟中的實體代碼或 Skill 引導規則檔案，軟體 UI 不會提供實體檔案的刪除功能。<br>
+                        若想移除，您必須回到您的作業系統中（如 Windows 檔案總管或編輯器），直接前往專案路徑 <code style="color: var(--primary);">d:\AAA-Project\attn-class3\.agents\skills\</code>，<strong>將 hello-world-helper 資料夾刪除</strong>。刪除後重載或刷新設定頁面，項目即會自動在列表中消失。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 13 -->
+        <section id="project-specific-settings" class="section-card">
+            <h2 class="section-header">11. 專案專屬偏好與本地安全權限設定 (Project-Specific Settings)</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                在 Antigravity 中，除了全域設定之外，您還可以針對各個載入的專案進行<strong>專案專屬偏好與安全權限設定</strong>。專案設定具有更高的優先權，能覆蓋全域安全設定，以滿足不同專案的客製化安全要求。
+            </p>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 11.1 如何進入專案設定
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                點選設定視窗左側的 <span class="highlight">Projects</span> 列表，點擊您要管理的專案名稱（例如 <span class="highlight">attn-class3</span>），即可於右側開啟專案專屬設定面板。
+            </p>
+
+            <div class="divider"></div>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 11.2 專案偏好設定與運作行為 (Agent Settings & Behavior)
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                如下圖所示，面板上半部主要管理專案的資料夾範圍與 AI 代理的執行模式：
+            </p>
+
+            <div class="img-wrapper">
+                <img src="./images/project_settings_1.png" alt="專案專屬設定面板 - 上半部">
+            </div>
+
+            <div class="intro-grid" style="margin-top: 1.5rem; margin-bottom: 2rem;">
+                <div class="intro-item">
+                    <div class="intro-name">Folders - 專案載入目錄</div>
+                    <div class="intro-desc">
+                        顯示目前此專案所綁定的本地資料夾路徑（例如 <code style="color: var(--primary);">attn-class3/</code>）。您也可以在此點選 <strong style="color: #ffffff;">+ Add Folder</strong> 為此專案關聯多個本地資料夾，讓 AI 可以跨目錄讀取與協作。
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">Agent Settings - 代理執行安全預設</div>
+                    <div class="intro-desc">
+                        <strong style="color: #ffffff;">Security Preset</strong>：控制指令自動執行與檔案讀寫。有三種預設與自訂模式：
+                        <div class="img-wrapper" style="margin: 0.75rem 0;">
+                            <img src="./images/project_security_preset_list.png" alt="Security Preset 選項清單" style="max-height: 180px; width: auto;">
+                        </div>
+                        <ul style="padding-left: 1rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; list-style-type: none;">
+                            <li>• <span class="highlight">Default</span>：執行終端指令及存取工作目錄外檔案皆需手動審查批准。</li>
+                            <li>• <span class="highlight">Full Machine</span>：允許直接讀寫全機檔案，但執行指令仍需手動批准。</li>
+                            <li>• <span class="highlight">Turbo Mode</span>：關閉所有安全防線，提供最快的自動化迭代。</li>
+                            <li>• <span class="highlight">Custom</span>：自訂模式下可細部微調以下選項：
+                                <div class="img-wrapper" style="margin: 0.5rem 0;">
+                                    <img src="./images/project_security_preset_custom.png" alt="自訂安全選項" style="max-height: 100px; width: auto;">
+                                </div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem; padding-left: 0.5rem;">
+                                    • <strong>Outside folders access</strong> (工作目錄外讀寫)：可選 Always Ask (每次詢問)、Allow (允許)、Deny (拒絕)
+                                    <div class="img-wrapper" style="margin: 0.25rem 0;"><img src="./images/project_security_file_access.png" alt="檔案讀寫權限" style="max-height: 80px; width: auto;"></div>
+                                    • <strong>Terminal Auto Execution</strong> (終端指令自動化)：可選 Require Review (需要審查) 或 Always Proceed (直接執行)
+                                    <div class="img-wrapper" style="margin: 0.25rem 0;"><img src="./images/project_security_cmd_exec.png" alt="終端執行權限" style="max-height: 60px; width: auto;"></div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="intro-item" style="grid-column: span 2;">
+                    <div class="intro-name">Agent Behavior - 代理行為策略</div>
+                    <div class="intro-desc" style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 250px;">
+                            <strong style="color: #ffffff;">Artifact Review Policy</strong>：控制 AI 助理在創建或更新輔助文件（Artifacts）時，是否必須先向使用者請求批准。
+                            <ul style="padding-left: 1rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; list-style-type: none;">
+                                <li>• <span class="highlight">Always Proceed (直接執行，預設)</span>：AI 直接在背景建立與更新這些清單和文件，不中斷對話。</li>
+                                <li>• <span class="highlight">Always Ask (每次詢問)</span>：每建立一個檔案，都會在對話中彈出按鈕請求批准。</li>
+                            </ul>
+                        </div>
+                        <div class="img-wrapper" style="flex-shrink: 0; margin: 0;">
+                            <img src="./images/project_behavior_review_policy.png" alt="文件審查原則選項" style="max-height: 100px; width: auto;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 11.3 本地安全權限覆蓋與管理 (Local Permissions & Danger Zone)
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                如下圖所示，面板下半部管理專案的本地安全權限，並繼承自全域安全設定：
+            </p>
+
+            <div class="img-wrapper">
+                <img src="./images/project_settings_2.png" alt="專案專屬設定面板 - 下半部">
+            </div>
+
+            <div class="intro-grid" style="margin-top: 1.5rem; margin-bottom: 2rem;">
+                <div class="intro-item">
+                    <div class="intro-name">Local Permissions - 本地專屬權限</div>
+                    <div class="intro-desc">
+                        本地專案權限<strong>優先於全域設定</strong>。您可以針對本專案單獨放寬或收緊特定目錄的檔案讀寫（File Access Rules）、網路連線（Network Access Rules）、終端指令（Terminal Commands）、沙盒指令放行（Commands Outside Sandbox）以及外部 MCP Tools，確保此專案的指令在最安全的條件下執行。
+                    </div>
+                </div>
+
+                <div class="intro-item">
+                    <div class="intro-name">Customizations & Danger Zone</div>
+                    <div class="intro-desc">
+                        <ul>
+                            <li><strong style="color: #ffffff;">Customizations</strong>：顯示本專案專屬載入技能與 MCP 伺服器的 Token 配額。</li>
+                            <li><strong style="color: #ef4444;">Delete Project</strong>：永久刪除此專案配置與對話紀錄。此操作僅移除軟體內的關聯與快取，<strong style="color: var(--accent);">絕對不會</strong>刪除您硬碟上的實體代碼檔案。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 14: GitHub Connector -->
+        <section id="github-connector-skill" class="section-card">
+            <h2 class="section-header">12. 實戰進階 - 建立 GitHub Connector 技能</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                本章節引導學生為專案建立一個實用的 <strong>GitHub Connector</strong> 自訂技能，使 Antigravity AI 助理能透過 GitHub REST API 讀取或寫入 GitHub 儲存庫的資訊。
+            </p>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 12.1 為什麼需要建立 GitHub Connector？
+            </h3>
+            <div class="intro-grid" style="margin-bottom: 2.5rem;">
+                <div class="intro-item">
+                    <div class="intro-name">遠端程式庫對接</div>
+                    <div class="intro-desc">
+                        允許 AI 助理自動從 GitHub 取得最新的程式庫架構、Issue 列表、Pull Requests 等，加速開發與除錯。
+                    </div>
+                </div>
+                <div class="intro-item">
+                    <div class="intro-name">自動化協作與安全性</div>
+                    <div class="intro-desc">
+                        使 AI 助理能直接在專案中建立 Issue、提交檔案變更，提升人機協作的開發效率。並透過本地 <code>.env</code> 管理憑證，避免金鑰外洩。
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 12.2 技能資料夾與檔案結構
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                在專案目錄下建立 <code style="color: var(--primary);">.agents/skills/github-connector/</code> 資料夾，並包含以下檔案：
+            </p>
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
+                <ul style="color: var(--text-muted); font-size: 0.95rem; display: flex; flex-direction: column; gap: 0.75rem; list-style-type: none; padding-left: 0.5rem;">
+                    <li>• <strong style="color: #ffffff;">SKILL.md</strong>：自訂技能引導文件，定義技能名稱、說明與 AI 使用的命令參數。</li>
+                    <li>• <strong style="color: #ffffff;">github_connector.py</strong>：使用 Python 標準函式庫實作的 API 介接 CLI 腳本，無外部相依，穩定性佳。</li>
+                    <li>• <strong style="color: #ffffff;">requirements.txt</strong>：列出相依套件，提供必要時使用。</li>
+                    <li>• <strong style="color: #ffffff;">.env.template</strong>：環境變數範本，用以填寫 <code>GITHUB_TOKEN</code>。</li>
+                </ul>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3 style="font-size: 1.25rem; color: #ffffff; margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--primary);">✦</span> 12.3 核心程式碼實現與 AI 調用
+            </h3>
+            <ol style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.8; padding-left: 1.5rem; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1rem;">
+                <li>
+                    <strong>設定金鑰憑證</strong>：<br>
+                    複製 <code>.env.template</code> 並重新命名為 <code>.env</code>，貼入您的 GitHub PAT：<br>
+                    <code style="color: var(--accent); background: rgba(0,0,0,0.2); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace;">GITHUB_TOKEN=ghp_yourActualTokenHere</code>
+                </li>
+                <li>
+                    <strong>執行測試指令</strong>：<br>
+                    在終端機中執行測試腳本，驗證連線是否成功：<br>
+                    <code style="color: var(--primary); background: rgba(0,0,0,0.2); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace;">python .agents/skills/github-connector/test_connector.py</code>
+                </li>
+                <li>
+                    <strong>AI 助理自動呼叫</strong>：<br>
+                    設定完成後，在對話中輸入：*「幫我看看 GitHub 上的 octocat/hello-world 專案裡有什麼檔案？」*，Antigravity 會自動調用該技能取得結果。
+                </li>
+            </ol>
+        </section>
+
+        <!-- Appendix -->
+        <section id="collaboration-rules" class="section-card">
+            <h2 class="section-header">附錄：協作規範與原則</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                本專案採用人機協作模式，為確保 AI 能理解教學脈絡、學生能清晰掌握變更，請嚴格遵守以下角色與記錄規範：
+            </p>
+            
+            <div class="role-grid">
+                <div class="role-card">
+                    <div class="role-name">指導老師</div>
+                    <div class="role-desc">指導老師 / 導師，引導學生學習並下達核心指令。</div>
+                </div>
+                <div class="role-card">
+                    <div class="role-name">Antigravity</div>
+                    <div class="role-desc">Antigravity 本 AI 助理，負責落實開發、生成說明文檔。</div>
+                </div>
+                <div class="role-card">
+                    <div class="role-name">ChatGPT</div>
+                    <div class="role-desc">ChatGPT 協作夥伴，提供創意發想與邏輯諮詢。</div>
+                </div>
+                <div class="role-card">
+                    <div class="role-name">Codex</div>
+                    <div class="role-desc">Codex 協作夥伴，專注於代碼最佳化與底層解析。</div>
+                </div>
+            </div>
+
+            <ul class="rule-list">
+                <li class="rule-item">
+                    <div class="rule-title">重要步驟全程紀錄</div>
+                    <div class="rule-detail">開發與教學中的每個重要轉折、功能實現，皆須保留步驟說明與歷程記錄。</div>
+                </li>
+                <li class="rule-item">
+                    <div class="rule-title">雙版本輸出原則</div>
+                    <div class="rule-detail">
+                        每個重要規劃，皆會同時生成：
+                        <br>• <span class="badge badge-primary">Markdown (.md)</span> 供 AI (Antigravity, ChatGPT, Codex) 閱讀理解與脈絡檢索。
+                        <br>• <span class="badge">HTML (.html)</span> 供人類（師生）閱讀，具備良好視覺美感。
+                    </div>
+                </li>
+                <li class="rule-item">
+                    <div class="rule-title">終極專案目標</div>
+                    <div class="rule-detail">本專案所有生成的步驟及說明，最終將統一整併進本 HTML 教學頁面，成為學生的實戰學習教材。</div>
+                </li>
+            </ul>
+        </section>
+
+        <footer style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 3rem;">
+            <p>© 2026 指導老師教學團隊 & Antigravity. All rights reserved.</p>
+        </footer>
+    </main>
+</div>
+
+
+    <script>
+        function copyPrompt(btn) {
+            var container = btn.closest('.prompt-box');
+            var text = container.querySelector('.prompt-text').innerText;
+            // Strip displaying quotes 「 and 」
+            var cleanText = text.replace(/^「/, '').replace(/」$/, '');
+            
+            navigator.clipboard.writeText(cleanText).then(function() {
+                var originalText = btn.innerText;
+                btn.innerText = '已複製！';
+                btn.style.background = 'rgba(16, 185, 129, 0.3)';
+                btn.style.borderColor = '#10b981';
+                btn.style.color = '#10b981';
+                setTimeout(function() {
+                    btn.innerText = originalText;
+                    btn.style.background = '';
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Copy failed:', err);
+                alert('複製失敗，請手動複製！');
+            });
+        }
+    </script>
+</body>
+</html>
